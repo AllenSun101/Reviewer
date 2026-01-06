@@ -12,22 +12,21 @@ export default function HomePage() {
           Find & Review Places That Matter
         </h1>
         <p className="text-neutral-600 max-w-xl mx-auto mb-8">
-          Search for locations, discover relevant reviews, or add your own insights
-          to help others make better decisions.
+          Personalize reviews and ratings in categories that matter to you.
         </p>
 
         <div className="flex justify-center gap-4">
           <Link
-            href="/search"
+            href="/Search"
             className="px-6 py-3 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
           >
             Search Places
           </Link>
           <Link
-            href="/search"
+            href="/AddReview"
             className="px-6 py-3 rounded-md border border-neutral-300 bg-white hover:bg-neutral-100"
           >
-            Add a Place
+            Add a Review
           </Link>
         </div>
       </section>
@@ -39,7 +38,7 @@ export default function HomePage() {
             <MapPin className="h-8 w-8 mx-auto text-neutral-900 mb-3" />
             <h3 className="font-medium text-neutral-900 mb-1">Search</h3>
             <p className="text-sm text-neutral-600">
-              Find places using natural language and relevance-based matching.
+              Find places using relevance-based matching and personalized attribute preference weighting.
             </p>
           </div>
 
@@ -47,7 +46,7 @@ export default function HomePage() {
             <Star className="h-8 w-8 mx-auto text-neutral-900 mb-3" />
             <h3 className="font-medium text-neutral-900 mb-1">Review</h3>
             <p className="text-sm text-neutral-600">
-              Rate locations across categories that actually matter to you.
+              Rate locations across a variety of attributes to enhance nuance.
             </p>
           </div>
 
@@ -60,11 +59,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-neutral-200 py-6 text-center text-xs text-neutral-500">
-        Built for fast, thoughtful reviews.
-      </footer>
     </div>
   );
 }
