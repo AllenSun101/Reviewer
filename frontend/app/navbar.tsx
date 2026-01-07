@@ -21,6 +21,12 @@ export default function Navbar() {
           <Link href="/AddReview" className="hover:text-neutral-900 transition">
             Add Review
           </Link>
+          <Link href="/Profile" className="hover:text-neutral-900 transition">
+            Profile
+          </Link>
+          <Link href="/Login" className="hover:text-neutral-900 transition">
+            Login
+          </Link>
         </div>
 
       </div>
