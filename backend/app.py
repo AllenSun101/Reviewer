@@ -1,7 +1,7 @@
 from flask import Flask, request, Response
 from flask_cors import CORS
 import db
-from search import score_locations
+from search import score_locations, get_locations_ratings
 from bson import json_util, ObjectId
 
 app = Flask(__name__)
@@ -89,21 +89,27 @@ def get_place_details():
         mimetype="application/json"
     )
 
-@app.route("/GetRatingSearchResults", methods=["GET"])
+@app.route("/GetRatingSearchResults", methods=["POST"])
 def get_rating_search_results():
-    preference_weights = request.args.get("preference_weights")
-    place = request.args.get("place")
-    locations = db.get_collection("Places").distinct("name")
-    most_similar_locations = score_locations(place, locations)
+    data = request.get_json()
+    preference_weights = data.get("preference_weights")
+    place = data.get("place")
 
-    # Preference weights
-    # weight * keyword
+    locations_db = db.get_collection("Places")
+    locations = list(locations_db.find())
+    locations_filtered = score_locations(place, locations)[:50]
+    locations_ratings = get_locations_ratings(locations_filtered, preference_weights, locations_db)
 
-    # if not exact keyword match, find similar
-    # also have to account for semantic similarities
-    # if no data at all, drop the weight, or we can do confidence interval based on what's available
+    ranked_locations = sorted(
+        locations_ratings,
+        key=lambda x: x.get("rating", 0),
+        reverse=True
+    )
 
-    return 0
+    return Response(
+        json_util.dumps(ranked_locations),
+        mimetype="application/json"
+    )
 
 @app.route("/AddReview", methods=["POST"])
 def add_review():
