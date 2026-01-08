@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, Plus } from "lucide-react";
+import { useParams } from "next/navigation";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const DEFAULT_CATEGORIES = [
-  "Cleanliness",
   "Location",
   "Value",
   "Atmosphere",
@@ -28,15 +30,57 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 }
 
 export default function ReviewEntryPage() {
+  const params = useParams();
+  const placeId = params.place;
+  const router = useRouter();
+
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [customCategory, setCustomCategory] = useState("");
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [generalComments, setGeneralComments] = useState("");
+  const [placeInfo, setPlaceInfo] = useState<any>({});
+
+  const userId = "695eccdda75f2529c32302af";
+
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/GetPlaceDetails', {
+          params: {
+            id: placeId,
+          }
+        })
+        setPlaceInfo(response.data);
+      } catch (err) {
+        console.error("Failed to fetch place info:", err);
+      }
+    };
+    fetchPlaces();
+  }, []);
 
   const addCustomCategory = () => {
     if (!customCategory.trim()) return;
     setCategories([...categories, customCategory]);
     setCustomCategory("");
   };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post('http://localhost:5000/AddReview', {
+        userId: userId,
+        placeId: placeId,
+        ratings: ratings,
+        generalComments: generalComments,
+      })
+      if(response.data.status === "success"){
+        router.push(`/AddReview`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50 px-6 py-8">
@@ -76,10 +120,24 @@ export default function ReviewEntryPage() {
               </button>
             </div>
 
+            {/* General comments */}
+            <div className="pt-4">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                General comments
+              </label>
+              <textarea
+                rows={5}
+                placeholder="General comments..."
+                value={generalComments}
+                onChange={(e) => setGeneralComments(e.target.value)}
+                className="w-full resize-none rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              />
+            </div>
+
             {/* Submit */}
             <div className="pt-6">
               <button
-                onClick={() => console.log("Submit review:", ratings)}
+                onClick={(e) => handleSubmit(e)}
                 className="px-6 py-2 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
               >
                 Submit Review
@@ -91,16 +149,16 @@ export default function ReviewEntryPage() {
         {/* Right: Place info */}
         <div className="bg-white border border-neutral-200 rounded-lg p-5 h-fit">
           <h2 className="text-sm font-semibold text-neutral-900 mb-2">
-            The Local Coffee House
+            {placeInfo ? placeInfo["name"] : ""}
           </h2>
           <p className="text-sm text-neutral-600 mb-3">
-            Coffee shop near Texas A&M campus, popular for studying and group meetups.
+            Insert description here, aggregated from reviews and context
           </p>
 
           <div className="text-xs text-neutral-500 space-y-1">
-            <p>📍 College Station, TX</p>
-            <p>🕒 Open 7am - 10pm</p>
-            <p>☕ Category: Café</p>
+            <p>📍 {placeInfo ? placeInfo["address"] : ""}</p>
+            <p>🕒 Open Hours</p>
+            <p>☕ Category: {placeInfo ? placeInfo["categories"] : ""}</p>
           </div>
         </div>
       </div>

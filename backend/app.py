@@ -2,7 +2,7 @@ from flask import Flask, request, Response
 from flask_cors import CORS
 import db
 from search import score_locations
-from bson import json_util
+from bson import json_util, ObjectId
 
 app = Flask(__name__)
 CORS(app)
@@ -75,6 +75,16 @@ def get_add_search_results():
         mimetype="application/json"
     )
 
+@app.route("/GetPlaceDetails", methods=["GET"])
+def get_place_details():
+    id = request.args.get("id")
+    places = db.get_collection("Places")
+    place = places.find_one({"_id": ObjectId(id)})
+    return Response(
+        json_util.dumps(place),
+        mimetype="application/json"
+    )
+
 @app.route("/GetRatingSearchResults", methods=["GET"])
 def get_rating_search_results():
     preference_weights = request.args.get("preference_weights")
@@ -94,28 +104,30 @@ def get_rating_search_results():
 @app.route("/AddReview", methods=["POST"])
 def add_review():
     data = request.get_json()
-    keywords = data.get("keywords")
-    review = data.get("review")
-    name = data.get("name")
-    email = data.get("email")
-
-    users = db.get_collection("Users")
-    user = users.find_one({"email": email})
-    user["reviews"].append([keywords, review])
-    users.update_one({"email": email}, user)
+    ratings = data.get("ratings")
+    general_comments = data.get("generalComments")
+    place_id = data.get("placeId")
+    user_id = data.get("userId")
 
     places = db.get_collection("Places")
-    place = places.find_one({"name": name})
+    place = places.find_one({"_id": ObjectId(place_id)})
     review_keywords = place["review_keywords"]
 
-    for keyword, rating in keywords.items():
+    for keyword, rating in ratings.items():
         if keyword in review_keywords:
             review_keywords[keyword].append(rating)
         else:
             review_keywords[keyword] = [rating]
     
     place["review_keywords"] = review_keywords
-    places.update_one({"name": name}, place)
+    place["reviews"].append(general_comments)
+    places.replace_one({"_id": ObjectId(place_id)}, place)
+
+    users = db.get_collection("Users")
+    user = users.find_one({"_id": ObjectId(user_id)})
+    user["reviews"].append({"place_id": place_id, "place_name": place["name"], "place_address": place["address"],
+                            "ratings": ratings, "general_comments": general_comments})
+    users.replace_one({"_id": ObjectId(user_id)}, user)
 
     return {"status": "success"}
 
@@ -126,8 +138,8 @@ def modify_review():
     review = data.get("review")
     name = data.get("name")
     email = data.get("email")
-
-    # update user reviews
+    
+    # update user reviews 
     # update review keywords with differences in user review
 
 @app.route('/')
