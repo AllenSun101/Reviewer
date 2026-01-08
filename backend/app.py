@@ -23,13 +23,17 @@ def create_user():
 
 @app.route("/GetUserProfile", methods=["GET"])
 def get_user_profile():
-    email = request.args.get("email")
+    id = request.args.get("id")
     users = db.get_collection("Users")
-    account = users.find_one({"email": email})
+    account = users.find_one({"_id": ObjectId(id)})
 
     if not account:
         return {"status": "fail"}
-    return {"status": "success", "account": account}
+    
+    return Response(
+        json_util.dumps(account),
+        mimetype="application/json"
+    )
 
 @app.route("/AddPlace", methods=["POST"])
 def add_place():
