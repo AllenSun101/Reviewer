@@ -33,21 +33,6 @@ export default function ProfilePage() {
         bio: "Food enthusiast • Coffee lover • Exploring new places",
     };
 
-    const reviews = [
-        {
-        id: 1,
-        place: "Blue Bottle Coffee",
-        rating: 4,
-        comment: "Great coffee and clean atmosphere. A bit pricey but worth it.",
-        },
-        {
-        id: 2,
-        place: "Central Park",
-        rating: 5,
-        comment: "Perfect place to relax and walk around. Always a good time.",
-        },
-    ];
-
     return (
         <div className="min-h-screen bg-neutral-50 px-6 py-10">
             <div className="mx-auto max-w-3xl space-y-8">
@@ -84,8 +69,8 @@ export default function ProfilePage() {
                                         {keyword}: <span className="text-yellow-600">{"★".repeat(Number(stars))}{"☆".repeat(5 - Number(stars))}</span>
                                     </p>
                                 ))}
-                            <p className="text-sm text-neutral-700">{review["general_comments"]}</p>
-                        </CardContent>
+                                <p className="text-sm text-neutral-700">{review["general_comments"]}</p>
+                            </CardContent>
                         </Card>
                     ))}
                 </div>

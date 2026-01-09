@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,14 @@ export default function ReviewSearchPage() {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("searchResults");
+    if (saved) {
+      setResults(JSON.parse(saved));
+      setQuery(String(localStorage.getItem("query")));
+    }
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +39,8 @@ export default function ReviewSearchPage() {
       
       console.log(response.data);
       setResults(response.data || []);
+      localStorage.setItem("searchResults", JSON.stringify(response.data));
+      localStorage.setItem("query", query);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,7 +66,11 @@ export default function ReviewSearchPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 h-4 w-4" />
               <Input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value); 
+                  localStorage.removeItem("searchResults");
+                  localStorage.removeItem("query");
+                }}
                 placeholder="Search reviews…"
                 className="pl-9 bg-white border-neutral-200 focus-visible:ring-neutral-900"
               />
